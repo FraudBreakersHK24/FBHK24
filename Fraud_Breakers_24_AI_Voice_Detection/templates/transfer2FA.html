@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>2FA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+  </head>
+  <body>
+  <form id="uploadForm" enctype="multipart/form-data">
+  <script>
+  // Now let's create a DataTransfer to get a FileList
+    const dataTransfer = new DataTransfer();
+  </script>
+  <div id="success"></div>
+
+    <h3> 2FA for user {{userId}}</h4>
+    <h3>Please repeat the below phrases by clicking on record/stop buttons</h3>
+    {% for q in enrollQ %}
+    <p>{{q}} </p>
+    {% endfor %}
+    <div id="controls">
+  	 <button id="recordButton">Record</button>
+  	 <button id="pauseButton" disabled>Pause</button>
+  	 <button id="stopButton" disabled>Stop</button>
+    </div>
+    <div id="formats">Format: start recording to see sample rate</div>
+  	<p><strong>Recordings:</strong></p>
+  	<ol id="recordingsList"></ol>
+    <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
+  	<script src="{{url_for('static', filename='js/recorder.js')}}"></script>
+    <script src="{{url_for('static', filename='js/app.js')}}"></script>
+    </script>
+    
+    <script>
+
+    const form = document.querySelector('form');
+form.addEventListener('submit', handleSubmit);
+
+function handleSubmit(event) {
+  event.preventDefault();
+   uploadFiles();
+}
+
+function uploadFiles() {
+    
+    // Get a reference to our file input
+    const fileInput = document.querySelector('input[type="file"]');
+   
+    fileInput.files = dataTransfer.files;
+  const url = 'http://127.0.0.1:5000/2FAupload';
+  const formData = new FormData(form);
+
+  
+  fetch(url, {
+      method: 'POST',
+      body: formData,
+    }).then((res) => res.text())
+    .then(html=>{
+        document.getElementById('success').innerHTML = html;
+        })
+    .catch((err) => ('Error occurred', err))
+    
+}
+
+    </script>
+    <input type="file" id="fileInput" name="file" hidden/>
+  <button type="submit" id="uploadButton">Upload Files</button>
+    </form>
+  </body>
+</html>
+
